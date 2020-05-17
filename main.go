@@ -17,10 +17,21 @@ func main() {
 	r.Get("/session/{sessionId}", GetSession)
 	r.Post("/session", CreateSession)
 	r.Post("/session/{sessionId}/story", CreateStory)
+	r.Post("/session/{sessionId}/join", JoinSession)
 	r.Put("/session/{sessionId}/story/{storyName}/vote", StoryVote)
 	sr := mem.NewSessionRepository()
 	pointingService = *pointing.NewService(sr)
 	_ = http.ListenAndServe(":3000", r)
+}
+
+func JoinSession(w http.ResponseWriter, r *http.Request) {
+	sid := chi.URLParam(r, "sessionId")
+	jsr := &joinSessionRequest{}
+	_ = render.Decode(r, jsr)
+	s, _ := pointingService.JoinSession(sid, jsr.UserName)
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, s)
+
 }
 
 func StoryVote(_ http.ResponseWriter, r *http.Request) {
@@ -57,6 +68,10 @@ func CreateStory(w http.ResponseWriter, r *http.Request) {
 }
 
 type createSessionRequest struct {
+	UserName string `json:"userName"`
+}
+
+type joinSessionRequest struct {
 	UserName string `json:"userName"`
 }
 

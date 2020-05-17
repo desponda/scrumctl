@@ -35,6 +35,13 @@ func (a *App) StoryVote(sid string, story string, userId string, vote int) error
 	return nil
 }
 
+func (a *App) JoinSession(sid string, userName string) (Session, error) {
+	s, _ := a.sr.Find(sid)
+	_ = s.Join(userName)
+	_ = a.sr.Update(s)
+	return s, nil
+}
+
 func NewService(sr SessionRepository) *App {
 	return &App{
 		sr: sr,
